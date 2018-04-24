@@ -343,7 +343,7 @@ if __name__ == '__main__':
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
 
-    prev_rpn_stage_2 = [f for f in prev_saved_models if "fast_rpn_stage2" in f and f[-11:] == '.caffemodel']
+    prev_rpn_stage_2 = [f for f in prev_saved_models if "rpn_stage2" in f and f[-11:] == '.caffemodel']
 
     pretrained_model = args.pretrained_model
     starting_iters = 0
