@@ -353,7 +353,7 @@ if __name__ == '__main__':
         latest_index = np.argmax(num_iters)
 
         starting_iters = num_iters[latest_index]
-        pretrained_model = join(output_dir, prev_rpn_stage_1[latest_index])
+        pretrained_model = join(output_dir, prev_rpn_stage_2[latest_index])
 
 
     if starting_iters < max_iters[0]:
