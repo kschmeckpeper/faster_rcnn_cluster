@@ -275,16 +275,28 @@ if __name__ == '__main__':
     print 'Stage 1 RPN, generate proposals'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-    mp_kwargs = dict(
-            queue=mp_queue,
-            imdb_name=args.imdb_name,
-            rpn_model_path=str(rpn_stage1_out['model_path']),
-            cfg=cfg,
-            rpn_test_prototxt=rpn_test_prototxt)
-    p = mp.Process(target=rpn_generate, kwargs=mp_kwargs)
-    p.start()
-    rpn_stage1_out['proposal_path'] = mp_queue.get()['proposal_path']
-    p.join()
+    prev_proposals_stage_1 = [f for f in prev_saved_models if "rpn_stage1" in f and f[-14:] == '_proposals.pkl']
+
+    found_prev_proposal = False
+    if len(prev_proposals_stage_1) > 0:
+        for prev_proposal in prev_proposals_stage_1:
+            if str(starting_iters) in prev_proposal:
+                rpn_stage1_out['proposal_path'] = prev_proposal
+                found_prev_proposal = True
+                break
+
+
+    if not found_prev_proposal:
+        mp_kwargs = dict(
+                queue=mp_queue,
+                imdb_name=args.imdb_name,
+                rpn_model_path=str(rpn_stage1_out['model_path']),
+                cfg=cfg,
+                rpn_test_prototxt=rpn_test_prototxt)
+        p = mp.Process(target=rpn_generate, kwargs=mp_kwargs)
+        p.start()
+        rpn_stage1_out['proposal_path'] = mp_queue.get()['proposal_path']
+        p.join()
 
     # zf_rpn_stage1_iter_100_proposals.pkl
 
