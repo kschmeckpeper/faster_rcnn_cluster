@@ -105,7 +105,7 @@ def _init_caffe(cfg):
     caffe.set_device(cfg.GPU_ID)
 
 def train_rpn(queue=None, imdb_name=None, init_model=None, solver=None,
-              max_iters=None, cfg=None):
+              starting_iters=None, max_iters=None, cfg=None):
     """Train a Region Proposal Network in a separate training process.
     """
 
@@ -128,6 +128,7 @@ def train_rpn(queue=None, imdb_name=None, init_model=None, solver=None,
 
     model_paths = train_net(solver, roidb, output_dir,
                             pretrained_model=init_model,
+                            starting_iters=starting_iters,
                             max_iters=max_iters)
     # Cleanup all but the final model
     for i in model_paths[:-1]:
@@ -240,16 +241,11 @@ if __name__ == '__main__':
     prev_rpn_stage_1 = [f for f in prev_saved_models if "rpn_stage1" in f and f[-11:] == '.caffemodel']
 
     pretrained_model = args.pretrained_model
+    starting_iters = 0
     if len(prev_rpn_stage_1) > 0:
         prev_rpn_stage_1.sort()
         pretrained_model = join(output_dir, prev_rpn_stage_1[-1])
-        #print "Using pretrained model: ", pretrained_model
-        #print "\n\n\n\n\n\n\n"
 
-    #print args.pretrained_model
-    #print pretrained_model
-    #print output_dir
-    #exit()
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
     mp_kwargs = dict(
@@ -257,6 +253,7 @@ if __name__ == '__main__':
             imdb_name=args.imdb_name,
             init_model=pretrained_model,
             solver=solvers[0],
+            starting_iters=starting_iters,
             max_iters=max_iters[0],
             cfg=cfg)
     p = mp.Process(target=train_rpn, kwargs=mp_kwargs)

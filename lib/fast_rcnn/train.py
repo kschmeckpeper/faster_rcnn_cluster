@@ -25,9 +25,10 @@ class SolverWrapper(object):
     """
 
     def __init__(self, solver_prototxt, roidb, output_dir,
-                 pretrained_model=None):
+                 pretrained_model=None, starting_iters=0):
         """Initialize the SolverWrapper."""
         self.output_dir = output_dir
+        self.starting_iters = starting_iters
 
         if (cfg.TRAIN.HAS_RPN and cfg.TRAIN.BBOX_REG and
             cfg.TRAIN.BBOX_NORMALIZE_TARGETS):
@@ -79,7 +80,7 @@ class SolverWrapper(object):
         infix = ('_' + cfg.TRAIN.SNAPSHOT_INFIX
                  if cfg.TRAIN.SNAPSHOT_INFIX != '' else '')
         filename = (self.solver_param.snapshot_prefix + infix +
-                    '_iter_{:d}'.format(self.solver.iter) + '.caffemodel')
+                    '_iter_{:d}'.format(self.solver.iter + self.starting_iters) + '.caffemodel')
         filename = os.path.join(self.output_dir, filename)
 
         net.save(str(filename))
@@ -96,19 +97,19 @@ class SolverWrapper(object):
         last_snapshot_iter = -1
         timer = Timer()
         model_paths = []
-        while self.solver.iter < max_iters:
+        while self.solver.iter + self.starting_iters < max_iters:
             # Make one SGD update
             timer.tic()
             self.solver.step(1)
             timer.toc()
-            if self.solver.iter % (10 * self.solver_param.display) == 0:
+            if (self.solver.iter + self.starting_iters) % (10 * self.solver_param.display) == 0:
                 print 'speed: {:.3f}s / iter'.format(timer.average_time)
 
-            if self.solver.iter % cfg.TRAIN.SNAPSHOT_ITERS == 0:
-                last_snapshot_iter = self.solver.iter
+            if (self.solver.iter + self.starting_iters) % cfg.TRAIN.SNAPSHOT_ITERS == 0:
+                last_snapshot_iter = self.solver.iter + self.starting_iters
                 model_paths.append(self.snapshot())
 
-        if last_snapshot_iter != self.solver.iter:
+        if last_snapshot_iter != self.solver.iter + self.starting_iters:
             model_paths.append(self.snapshot())
         return model_paths
 
@@ -150,12 +151,12 @@ def filter_roidb(roidb):
     return filtered_roidb
 
 def train_net(solver_prototxt, roidb, output_dir,
-              pretrained_model=None, max_iters=40000):
+              pretrained_model=None, starting_iters=0, max_iters=40000):
     """Train a Fast R-CNN network."""
 
     roidb = filter_roidb(roidb)
     sw = SolverWrapper(solver_prototxt, roidb, output_dir,
-                       pretrained_model=pretrained_model)
+                       pretrained_model=pretrained_model, starting_iters=starting_iters)
 
     print 'Solving...'
     model_paths = sw.train_model(max_iters)
