@@ -281,7 +281,7 @@ if __name__ == '__main__':
     if len(prev_proposals_stage_1) > 0:
         for prev_proposal in prev_proposals_stage_1:
             if str(starting_iters) in prev_proposal:
-                rpn_stage1_out['proposal_path'] = prev_proposal
+                rpn_stage1_out['proposal_path'] = join(output_dir, prev_proposal)
                 found_prev_proposal = True
                 break
 
