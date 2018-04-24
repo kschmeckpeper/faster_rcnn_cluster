@@ -243,8 +243,12 @@ if __name__ == '__main__':
     pretrained_model = args.pretrained_model
     starting_iters = 0
     if len(prev_rpn_stage_1) > 0:
-        prev_rpn_stage_1.sort()
-        pretrained_model = join(output_dir, prev_rpn_stage_1[-1])
+        num_iters = [int(s.replace('_', '.').split('.')[-2]) for s in prev_rpn_stage_1]
+
+        latest_index = np.argmax(num_iters)
+
+        starting_iters = num_iters[latest_index]
+        pretrained_model = join(output_dir, prev_rpn_stage_1[latest_index])
 
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
