@@ -347,7 +347,7 @@ if __name__ == '__main__':
 
     pretrained_model = args.pretrained_model
     starting_iters = 0
-    if len(prev_rpn_stage_1) > 0:
+    if len(prev_rpn_stage_2) > 0:
         num_iters = [int(s.replace('_', '.').split('.')[-2]) for s in prev_rpn_stage_2]
 
         latest_index = np.argmax(num_iters)
