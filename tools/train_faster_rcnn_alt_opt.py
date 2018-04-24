@@ -231,8 +231,7 @@ if __name__ == '__main__':
     imdb = get_imdb(args.imdb_name)
     output_dir = get_output_dir(imdb)
     prev_saved_models = [f for f in listdir(output_dir) if isfile(join(output_dir, f))]
-    print prev_saved_models
-    #exit()
+
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, init from ImageNet model'
@@ -269,7 +268,6 @@ if __name__ == '__main__':
         rpn_stage1_out = dict()
         rpn_stage1_out['model_path'] = pretrained_model
 
-    # zf_rpn_stage1_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, generate proposals'
@@ -298,7 +296,6 @@ if __name__ == '__main__':
         rpn_stage1_out['proposal_path'] = mp_queue.get()['proposal_path']
         p.join()
 
-    # zf_rpn_stage1_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 Fast R-CNN using RPN proposals, init from ImageNet model'
@@ -336,7 +333,6 @@ if __name__ == '__main__':
         fast_rcnn_stage1_out = dict()
         fast_rcnn_stage1_out['model_path'] = pretrained_model
 
-    # zf_fast_rcnn_stage1_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 RPN, init from stage 1 Fast R-CNN model'
@@ -375,7 +371,6 @@ if __name__ == '__main__':
         rpn_stage2_out['model_path'] = pretrained_model
 
 
-    # zf_rpn_stage2_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 RPN, generate proposals'
@@ -406,7 +401,6 @@ if __name__ == '__main__':
         p.join()
 
 
-    # zf_rpn_stage2_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 Fast R-CNN, init from stage 2 RPN R-CNN model'
@@ -444,8 +438,6 @@ if __name__ == '__main__':
         fast_rcnn_stage2_out = dict()
         fast_rcnn_stage2_out['model_path'] = pretrained_model
 
-    # zf_fast_rcnn_stage2_iter_100.caffemodel
-    exit()
     # Create final model (just a copy of the last stage)
     final_path = os.path.join(
             os.path.dirname(fast_rcnn_stage2_out['model_path']),
