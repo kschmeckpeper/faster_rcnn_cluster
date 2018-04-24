@@ -374,24 +374,38 @@ if __name__ == '__main__':
         rpn_stage2_out = dict()
         rpn_stage2_out['model_path'] = pretrained_model
 
-    exit()
+
     # zf_rpn_stage2_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 RPN, generate proposals'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-    mp_kwargs = dict(
-            queue=mp_queue,
-            imdb_name=args.imdb_name,
-            rpn_model_path=str(rpn_stage2_out['model_path']),
-            cfg=cfg,
-            rpn_test_prototxt=rpn_test_prototxt)
-    p = mp.Process(target=rpn_generate, kwargs=mp_kwargs)
-    p.start()
-    rpn_stage2_out['proposal_path'] = mp_queue.get()['proposal_path']
-    p.join()
 
+    prev_proposals_stage_2 = [f for f in prev_saved_models if "rpn_stage2" in f and f[-14:] == '_proposals.pkl']
+
+    found_prev_proposal = False
+    if len(prev_proposals_stage_2) > 0:
+        for prev_proposal in prev_proposals_stage_2:
+            if str(starting_iters) in prev_proposal:
+                rpn_stage2_out['proposal_path'] = join(output_dir, prev_proposal)
+                found_prev_proposal = True
+                break
+
+
+    if not found_prev_proposal:
+        mp_kwargs = dict(
+                queue=mp_queue,
+                imdb_name=args.imdb_name,
+                rpn_model_path=str(rpn_stage2_out['model_path']),
+                cfg=cfg,
+                rpn_test_prototxt=rpn_test_prototxt)
+        p = mp.Process(target=rpn_generate, kwargs=mp_kwargs)
+        p.start()
+        rpn_stage2_out['proposal_path'] = mp_queue.get()['proposal_path']
+        p.join()
+
+    exit()
     # zf_rpn_stage2_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
