@@ -266,7 +266,8 @@ if __name__ == '__main__':
         rpn_stage1_out = mp_queue.get()
         p.join()
     else:
-        rpn_stage1_out = pretrained_model
+        rpn_stage1_out = dict()
+        rpn_stage1_out['model_path'] = pretrained_model
 
     # zf_rpn_stage1_iter_100.caffemodel
 
