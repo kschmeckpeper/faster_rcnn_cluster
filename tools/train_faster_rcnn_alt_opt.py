@@ -251,19 +251,20 @@ if __name__ == '__main__':
         pretrained_model = join(output_dir, prev_rpn_stage_1[latest_index])
 
 
-    cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
-    mp_kwargs = dict(
-            queue=mp_queue,
-            imdb_name=args.imdb_name,
-            init_model=pretrained_model,
-            solver=solvers[0],
-            starting_iters=starting_iters,
-            max_iters=max_iters[0],
-            cfg=cfg)
-    p = mp.Process(target=train_rpn, kwargs=mp_kwargs)
-    p.start()
-    rpn_stage1_out = mp_queue.get()
-    p.join()
+    if starting_iters < max_iters[0]:
+        cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
+        mp_kwargs = dict(
+                queue=mp_queue,
+                imdb_name=args.imdb_name,
+                init_model=pretrained_model,
+                solver=solvers[0],
+                starting_iters=starting_iters,
+                max_iters=max_iters[0],
+                cfg=cfg)
+        p = mp.Process(target=train_rpn, kwargs=mp_kwargs)
+        p.start()
+        rpn_stage1_out = mp_queue.get()
+        p.join()
 
     # zf_rpn_stage1_iter_100.caffemodel
 
