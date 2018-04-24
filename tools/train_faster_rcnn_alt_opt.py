@@ -227,7 +227,7 @@ if __name__ == '__main__':
     solvers, max_iters, rpn_test_prototxt = get_solvers(args.net_name)
 
 
-    roidb, imdb = get_roidb(args.imdb_name, rpn_file=None)
+    imdb = get_imdb(args.imdb_name)
     output_dir = get_output_dir(imdb)
     prev_saved_models = [f for f in listdir(output_dir) if isfile(join(output_dir, f))]
     print prev_saved_models
