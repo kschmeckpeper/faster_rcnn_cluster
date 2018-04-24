@@ -342,19 +342,39 @@ if __name__ == '__main__':
     print 'Stage 2 RPN, init from stage 1 Fast R-CNN model'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-    cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
-    mp_kwargs = dict(
-            queue=mp_queue,
-            imdb_name=args.imdb_name,
-            init_model=str(fast_rcnn_stage1_out['model_path']),
-            solver=solvers[2],
-            max_iters=max_iters[2],
-            cfg=cfg)
-    p = mp.Process(target=train_rpn, kwargs=mp_kwargs)
-    p.start()
-    rpn_stage2_out = mp_queue.get()
-    p.join()
 
+    prev_rpn_stage_2 = [f for f in prev_saved_models if "fast_rpn_stage1" in f and f[-11:] == '.caffemodel']
+
+    pretrained_model = args.pretrained_model
+    starting_iters = 0
+    if len(prev_rpn_stage_1) > 0:
+        num_iters = [int(s.replace('_', '.').split('.')[-2]) for s in prev_rpn_stage_2]
+
+        latest_index = np.argmax(num_iters)
+
+        starting_iters = num_iters[latest_index]
+        pretrained_model = join(output_dir, prev_rpn_stage_1[latest_index])
+
+
+    if starting_iters < max_iters[0]:
+        cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
+        mp_kwargs = dict(
+                queue=mp_queue,
+                imdb_name=args.imdb_name,
+                init_model=str(fast_rcnn_stage1_out['model_path']),
+                solver=solvers[2],
+                starting_iters=starting_iters,
+                max_iters=max_iters[2],
+                cfg=cfg)
+        p = mp.Process(target=train_rpn, kwargs=mp_kwargs)
+        p.start()
+        rpn_stage2_out = mp_queue.get()
+        p.join()
+    else:
+        rpn_stage2_out = dict()
+        rpn_stage2_out['model_path'] = pretrained_model
+
+    exit()
     # zf_rpn_stage2_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
