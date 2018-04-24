@@ -405,29 +405,47 @@ if __name__ == '__main__':
         rpn_stage2_out['proposal_path'] = mp_queue.get()['proposal_path']
         p.join()
 
-    exit()
+
     # zf_rpn_stage2_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 Fast R-CNN, init from stage 2 RPN R-CNN model'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-    cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
-    mp_kwargs = dict(
-            queue=mp_queue,
-            imdb_name=args.imdb_name,
-            init_model=str(rpn_stage2_out['model_path']),
-            solver=solvers[3],
-            max_iters=max_iters[3],
-            cfg=cfg,
-            rpn_file=rpn_stage2_out['proposal_path'])
-    p = mp.Process(target=train_fast_rcnn, kwargs=mp_kwargs)
-    p.start()
-    fast_rcnn_stage2_out = mp_queue.get()
-    p.join()
+
+    prev_rcnn_stage_2 = [f for f in prev_saved_models if "fast_rcnn_stage2" in f and f[-11:] == '.caffemodel']
+
+    pretrained_model = args.pretrained_model
+    starting_iters = 0
+    if len(prev_rcnn_stage_2) > 0:
+        num_iters = [int(s.replace('_', '.').split('.')[-2]) for s in prev_rcnn_stage_2]
+
+        latest_index = np.argmax(num_iters)
+
+        starting_iters = num_iters[latest_index]
+        pretrained_model = join(output_dir, prev_rcnn_stage_2[latest_index])
+
+
+    if starting_iters < max_iters[0]:
+        cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
+        mp_kwargs = dict(
+                queue=mp_queue,
+                imdb_name=args.imdb_name,
+                init_model=str(rpn_stage2_out['model_path']),
+                solver=solvers[3],
+                max_iters=max_iters[3],
+                cfg=cfg,
+                rpn_file=rpn_stage2_out['proposal_path'])
+        p = mp.Process(target=train_fast_rcnn, kwargs=mp_kwargs)
+        p.start()
+        fast_rcnn_stage2_out = mp_queue.get()
+        p.join()
+    else:
+        fast_rcnn_stage2_out = dict()
+        fast_rcnn_stage2_out['model_path'] = pretrained_model
 
     # zf_fast_rcnn_stage2_iter_100.caffemodel
-
+    exit()
     # Create final model (just a copy of the last stage)
     final_path = os.path.join(
             os.path.dirname(fast_rcnn_stage2_out['model_path']),
