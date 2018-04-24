@@ -105,7 +105,7 @@ def _init_caffe(cfg):
     caffe.set_device(cfg.GPU_ID)
 
 def train_rpn(queue=None, imdb_name=None, init_model=None, solver=None,
-              starting_iters=None, max_iters=None, cfg=None):
+              starting_iters=0, max_iters=None, cfg=None):
     """Train a Region Proposal Network in a separate training process.
     """
 
