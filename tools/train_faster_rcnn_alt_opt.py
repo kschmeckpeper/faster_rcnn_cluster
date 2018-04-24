@@ -22,6 +22,8 @@ import argparse
 import pprint
 import numpy as np
 import sys, os
+from os import listdir
+from os.path import isfile, join
 import multiprocessing as mp
 import cPickle
 import shutil
@@ -223,6 +225,13 @@ if __name__ == '__main__':
     mp_queue = mp.Queue()
     # solves, iters, etc. for each training stage
     solvers, max_iters, rpn_test_prototxt = get_solvers(args.net_name)
+
+
+    roidb, imdb = get_roidb(args.imdb_name, rpn_file=None)
+    output_dir = get_output_dir(imdb)
+    prev_saved_models = [f for f in listdir(output_dir) if isfile(join(output_dir, f))]
+    print prev_saved_models
+    exit()
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, init from ImageNet model'
