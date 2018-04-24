@@ -79,8 +79,8 @@ def get_solvers(net_name):
                [net_name, n, 'stage2_fast_rcnn_solver30k40k.pt']]
     solvers = [os.path.join(cfg.MODELS_DIR, *s) for s in solvers]
     # Iterations for each training stage
-    max_iters = [80000, 40000, 80000, 40000]
-    # max_iters = [100, 100, 100, 100]
+    #max_iters = [80000, 40000, 80000, 40000]
+    max_iters = [100, 100, 100, 100]
     # Test prototxt for the RPN
     rpn_test_prototxt = os.path.join(
         cfg.MODELS_DIR, net_name, n, 'rpn_test.pt')
@@ -231,22 +231,25 @@ if __name__ == '__main__':
     output_dir = get_output_dir(imdb)
     prev_saved_models = [f for f in listdir(output_dir) if isfile(join(output_dir, f))]
     print prev_saved_models
-    exit()
+    #exit()
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, init from ImageNet model'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
-    prev_rpn_stage_1 = [f for f in prev_saved_models if "rpn_stage1" in f]
+    prev_rpn_stage_1 = [f for f in prev_saved_models if "rpn_stage1" in f and f[-11:] == '.caffemodel']
 
     pretrained_model = args.pretrained_model
     if len(prev_rpn_stage_1) > 0:
         prev_rpn_stage_1.sort()
-        pretrained_model = prev_rpn_stage_1[-1]
-        print "Using pretrained model: ", pretrained_model
+        pretrained_model = join(output_dir, prev_rpn_stage_1[-1])
+        #print "Using pretrained model: ", pretrained_model
+        #print "\n\n\n\n\n\n\n"
 
-
-
+    #print args.pretrained_model
+    #print pretrained_model
+    #print output_dir
+    #exit()
 
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
     mp_kwargs = dict(
