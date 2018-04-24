@@ -237,11 +237,22 @@ if __name__ == '__main__':
     print 'Stage 1 RPN, init from ImageNet model'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
 
+    prev_rpn_stage_1 = [f for f in prev_saved_models if "rpn_stage1" in f]
+
+    pretrained_model = args.pretrained_model
+    if len(prev_rpn_stage_1) > 0:
+        prev_rpn_stage_1.sort()
+        pretrained_model = prev_rpn_stage_1[-1]
+        print "Using pretrained model: ", pretrained_model
+
+
+
+
     cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
     mp_kwargs = dict(
             queue=mp_queue,
             imdb_name=args.imdb_name,
-            init_model=args.pretrained_model,
+            init_model=pretrained_model,
             solver=solvers[0],
             max_iters=max_iters[0],
             cfg=cfg)
@@ -249,6 +260,8 @@ if __name__ == '__main__':
     p.start()
     rpn_stage1_out = mp_queue.get()
     p.join()
+
+    # zf_rpn_stage1_iter_100.caffemodel
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, generate proposals'
@@ -264,6 +277,8 @@ if __name__ == '__main__':
     p.start()
     rpn_stage1_out['proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
+
+    # zf_rpn_stage1_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 Fast R-CNN using RPN proposals, init from ImageNet model'
@@ -283,6 +298,8 @@ if __name__ == '__main__':
     fast_rcnn_stage1_out = mp_queue.get()
     p.join()
 
+    # zf_fast_rcnn_stage1_iter_100.caffemodel
+
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 RPN, init from stage 1 Fast R-CNN model'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
@@ -300,6 +317,8 @@ if __name__ == '__main__':
     rpn_stage2_out = mp_queue.get()
     p.join()
 
+    # zf_rpn_stage2_iter_100.caffemodel
+
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 RPN, generate proposals'
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
@@ -314,6 +333,8 @@ if __name__ == '__main__':
     p.start()
     rpn_stage2_out['proposal_path'] = mp_queue.get()['proposal_path']
     p.join()
+
+    # zf_rpn_stage2_iter_100_proposals.pkl
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 2 Fast R-CNN, init from stage 2 RPN R-CNN model'
@@ -332,6 +353,8 @@ if __name__ == '__main__':
     p.start()
     fast_rcnn_stage2_out = mp_queue.get()
     p.join()
+
+    # zf_fast_rcnn_stage2_iter_100.caffemodel
 
     # Create final model (just a copy of the last stage)
     final_path = os.path.join(
