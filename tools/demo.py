@@ -76,7 +76,7 @@ def demo(net, image_name):
 
     # Load the demo image
     # im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
-    im_file = os.path.joinn('data', 'VOCdevkit2018', 'VOC2018', 'JPEGImages', image_name)
+    im_file = os.path.join('data', 'VOCdevkit2018', 'VOC2018', 'JPEGImages', image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
