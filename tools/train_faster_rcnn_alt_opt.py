@@ -428,6 +428,7 @@ if __name__ == '__main__':
                 imdb_name=args.imdb_name,
                 init_model=str(rpn_stage2_out['model_path']),
                 solver=solvers[3],
+                starting_iters=starting_iters,
                 max_iters=max_iters[3],
                 cfg=cfg,
                 rpn_file=rpn_stage2_out['proposal_path'])
