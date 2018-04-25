@@ -6,7 +6,8 @@
 # --------------------------------------------------------
 
 """Test a Fast R-CNN network on an imdb (image database)."""
-
+import matplotlib
+matplotlib.use("Agg")
 from fast_rcnn.config import cfg, get_output_dir
 from fast_rcnn.bbox_transform import clip_boxes, bbox_transform_inv
 import argparse
