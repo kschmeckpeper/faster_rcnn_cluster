@@ -68,7 +68,7 @@ def vis_detections(im, class_name, dets, image_name, thresh=0.5):
     plt.axis('off')
     plt.tight_layout()
     plt.draw()
-    plt.savefig(image_name + "_" + class_name + ".png")
+    plt.savefig(os.path.join("output_images", image_name + "_" + class_name + ".png"))
     return True
 
 def demo(net, image_name):
@@ -102,7 +102,7 @@ def demo(net, image_name):
         wrote = wrote or vis_detections(im, cls, dets, image_name, thresh=CONF_THRESH)
 
     if not wrote:
-        cv2.imwrite(image_name + ".png")
+        cv2.imwrite(os.path.join("output_images", image_name + ".png"))
 
 
 def parse_args():
