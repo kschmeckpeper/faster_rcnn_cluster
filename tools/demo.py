@@ -26,7 +26,7 @@ import argparse
 
 CLASSES = ('__background__',
            'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
+           'pelican_case', 'bus', 'car', 'cat', 'chair',
            'cow', 'diningtable', 'dog', 'horse',
            'motorbike', 'person', 'pottedplant',
            'sheep', 'sofa', 'train', 'tvmonitor')
@@ -102,7 +102,7 @@ def demo(net, image_name):
         wrote = wrote or vis_detections(im, cls, dets, image_name, thresh=CONF_THRESH)
 
     if not wrote:
-        cv2.imwrite(os.path.join("output_images", image_name + ".png"))
+        cv2.imwrite(os.path.join("output_images", image_name + ".png"), im)
 
 
 def parse_args():
