@@ -26,7 +26,7 @@ import argparse
 
 CLASSES = ('__background__',
            'aeroplane', 'bicycle', 'bird', 'boat',
-           'bottle', 'bus', 'car', 'cat', 'chair',
+           'pelican_case', 'bus', 'car', 'cat', 'chair',
            'cow', 'diningtable', 'dog', 'horse',
            'motorbike', 'person', 'pottedplant',
            'sheep', 'sofa', 'train', 'tvmonitor')
@@ -37,11 +37,11 @@ NETS = {'vgg16': ('VGG16',
                   'ZF_faster_rcnn_final.caffemodel')}
 
 
-def vis_detections(im, class_name, dets, thresh=0.5):
+def vis_detections(im, class_name, dets, image_name, thresh=0.5):
     """Draw detected bounding boxes."""
     inds = np.where(dets[:, -1] >= thresh)[0]
     if len(inds) == 0:
-        return
+        return False
 
     im = im[:, :, (2, 1, 0)]
     fig, ax = plt.subplots(figsize=(12, 12))
@@ -68,12 +68,15 @@ def vis_detections(im, class_name, dets, thresh=0.5):
     plt.axis('off')
     plt.tight_layout()
     plt.draw()
+    plt.savefig(os.path.join("output_images", image_name + "_" + class_name + ".png"))
+    return True
 
 def demo(net, image_name):
     """Detect object classes in an image using pre-computed object proposals."""
 
     # Load the demo image
-    im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
+    # im_file = os.path.join(cfg.DATA_DIR, 'demo', image_name)
+    im_file = os.path.join('data', 'VOCdevkit2018', 'VOC2018', 'JPEGImages', image_name)
     im = cv2.imread(im_file)
 
     # Detect all object classes and regress object bounds
@@ -87,6 +90,7 @@ def demo(net, image_name):
     # Visualize detections for each class
     CONF_THRESH = 0.8
     NMS_THRESH = 0.3
+    wrote = False
     for cls_ind, cls in enumerate(CLASSES[1:]):
         cls_ind += 1 # because we skipped background
         cls_boxes = boxes[:, 4*cls_ind:4*(cls_ind + 1)]
@@ -95,7 +99,11 @@ def demo(net, image_name):
                           cls_scores[:, np.newaxis])).astype(np.float32)
         keep = nms(dets, NMS_THRESH)
         dets = dets[keep, :]
-        vis_detections(im, cls, dets, thresh=CONF_THRESH)
+        wrote = wrote or vis_detections(im, cls, dets, image_name, thresh=CONF_THRESH)
+
+    if not wrote:
+        cv2.imwrite(os.path.join("output_images", image_name + ".png"), im)
+
 
 def parse_args():
     """Parse input arguments."""
@@ -141,8 +149,32 @@ if __name__ == '__main__':
     for i in xrange(2):
         _, _= im_detect(net, im)
 
-    im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
-                '001763.jpg', '004545.jpg']
+    # im_names = ['000456.jpg', '000542.jpg', '001150.jpg',
+    #             '001763.jpg', '004545.jpg']
+
+    im_names = ['0016.jpg',
+                '0017.jpg',
+                '0018.jpg',
+                '0051.jpg',
+                '0077.jpg',
+                '0130.jpg',
+                '0167.jpg',
+                '0209.jpg',
+                '0236.jpg',
+                '0275.jpg',
+                '0327.jpg',
+                '0361.jpg',
+                '0415.jpg',
+                '0455.jpg',
+                '0481.jpg',
+                '0532.jpg',
+                '0607.jpg',
+                '0713.jpg',
+                '0755.jpg',
+                '0812.jpg',
+                '0888.jpg',
+                '0921.jpg',
+                '0935.jpg']
     for im_name in im_names:
         print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
         print 'Demo for data/demo/{}'.format(im_name)

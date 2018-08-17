@@ -187,7 +187,7 @@ class coco(imdb):
                 self._get_box_file(index))
 
             raw_data = sio.loadmat(box_file)['boxes']
-            boxes = np.maximum(raw_data - 1, 0).astype(np.uint16)
+            boxes = np.maximum(raw_data - 1, 0).astype(np.uint32)
             if method == 'MCG':
                 # Boxes from the MCG website are in (y1, x1, y2, x2) order
                 boxes = boxes[:, (1, 0, 3, 2)]
@@ -250,7 +250,7 @@ class coco(imdb):
         objs = valid_objs
         num_objs = len(objs)
 
-        boxes = np.zeros((num_objs, 4), dtype=np.uint16)
+        boxes = np.zeros((num_objs, 4), dtype=np.uint32)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
         seg_areas = np.zeros((num_objs), dtype=np.float32)
