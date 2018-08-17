@@ -13,7 +13,7 @@ from datasets.coco import coco
 import numpy as np
 
 # Set up voc_<year>_<split> using selective search "fast" mode
-for year in ['2007', '2012', '2015', '2016', '2017', '2018', '2020']:
+for year in ['2007', '2012', '2015', '2016', '2017', '2018', '2019', '2020', '2022', '2023', '2024', '2025', '2026', '2027', '2028']:
     for split in ['train', 'val', 'trainval', 'test']:
         name = 'voc_{}_{}'.format(year, split)
         __sets[name] = (lambda split=split, year=year: pascal_voc(split, year))

@@ -79,7 +79,7 @@ def get_solvers(net_name):
                [net_name, n, 'stage2_fast_rcnn_solver30k40k.pt']]
     solvers = [os.path.join(cfg.MODELS_DIR, *s) for s in solvers]
     # Iterations for each training stage
-    max_iters = [80000, 40000, 80000, 40000]
+    max_iters = np.array([80000, 40000, 80000, 40000])
     # max_iters = [100, 100, 100, 100]
     # Test prototxt for the RPN
     rpn_test_prototxt = os.path.join(
@@ -211,8 +211,10 @@ if __name__ == '__main__':
     print(args)
 
     if args.cfg_file is not None:
+        print "Loading cfg from file:", args.cfg_file
         cfg_from_file(args.cfg_file)
     if args.set_cfgs is not None:
+        print "Loading cfg from list:", args.set_cfgs
         cfg_from_list(args.set_cfgs)
     cfg.GPU_ID = args.gpu_id
 
@@ -227,12 +229,14 @@ if __name__ == '__main__':
     mp_queue = mp.Queue()
     # solves, iters, etc. for each training stage
     solvers, max_iters, rpn_test_prototxt = get_solvers(args.net_name)
-
+    print "Created solvers"
 
     imdb = get_imdb(args.imdb_name)
+    print "Got imdb from:", args.imdb_name
     output_dir = get_output_dir(imdb)
+    print "Got output_dir:", output_dir
     prev_saved_models = [f for f in listdir(output_dir) if isfile(join(output_dir, f))]
-
+    
 
     print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
     print 'Stage 1 RPN, init from ImageNet model'
@@ -315,7 +319,7 @@ if __name__ == '__main__':
         pretrained_model = join(output_dir, prev_rcnn_stage_1[latest_index])
 
 
-    if starting_iters < max_iters[0]:
+    if starting_iters < max_iters[1]:
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage1'
         mp_kwargs = dict(
                 queue=mp_queue,
@@ -353,7 +357,7 @@ if __name__ == '__main__':
         pretrained_model = join(output_dir, prev_rpn_stage_2[latest_index])
 
 
-    if starting_iters < max_iters[0]:
+    if starting_iters < max_iters[2]:
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
         mp_kwargs = dict(
                 queue=mp_queue,
@@ -421,7 +425,7 @@ if __name__ == '__main__':
         pretrained_model = join(output_dir, prev_rcnn_stage_2[latest_index])
 
 
-    if starting_iters < max_iters[0]:
+    if starting_iters < max_iters[3]:
         cfg.TRAIN.SNAPSHOT_INFIX = 'stage2'
         mp_kwargs = dict(
                 queue=mp_queue,
