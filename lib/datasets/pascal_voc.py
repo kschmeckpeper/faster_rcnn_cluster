@@ -153,7 +153,7 @@ class pascal_voc(imdb):
         return roidb
 
     def rpn_roidb(self):
-        if int(self._year) == 2007 or self._image_set != 'test':
+        if self._image_set != 'test' or int(self._year) == 2007:
             gt_roidb = self.gt_roidb()
             rpn_roidb = self._load_rpn_roidb(gt_roidb)
             roidb = imdb.merge_roidbs(gt_roidb, rpn_roidb)
@@ -208,7 +208,7 @@ class pascal_voc(imdb):
             objs = non_diff_objs
         num_objs = len(objs)
 
-        boxes = np.zeros((num_objs, 4), dtype=np.uint16)
+        boxes = np.zeros((num_objs, 4), dtype=np.int32)
         gt_classes = np.zeros((num_objs), dtype=np.int32)
         overlaps = np.zeros((num_objs, self.num_classes), dtype=np.float32)
         # "Seg" area for pascal is just the box area
