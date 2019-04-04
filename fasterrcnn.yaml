@@ -1,0 +1,96 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: fasterrcnn
+spec:
+  backoffLimit: 5
+  completions: 1
+  template:
+    metadata:
+      labels:
+        app: fasterrcnn
+      name: fasterrcnn
+    spec:
+       affinity: {
+           nodeAffinity: {
+             requiredDuringSchedulingIgnoredDuringExecution: {
+               nodeSelectorTerms: [
+                 {
+                   matchExpressions: [
+                     {
+                       "key": "nvidia-gpu-name",
+                       "operator": "In",
+                       "values": ["Tesla-V100-DGXS-16GB","GeForce-GTX-TITAN-X","GeForce-GTX-1080-Ti"]
+                     }
+                   ]
+                 }
+               ]
+             }
+           }
+         }
+       restartPolicy: Never
+       securityContext:
+           runAsUser: 1000006
+           # runAsUser: 1000006
+           fsGroup: 1000001
+       volumes:
+       - name: shared-datasets
+         persistentVolumeClaim:
+             claimName: datasets
+       - name: user-home
+         persistentVolumeClaim:
+             claimName: home
+       - name: user-arx
+         persistentVolumeClaim:
+             claimName: archive
+       # $SHM_VOLUME
+       - name: dshm
+         emptyDir:
+             medium: Memory
+       containers:
+       - name: fasterrcnn
+         image: chaneyk/faster-rcnn-caffe
+         imagePullPolicy: IfNotPresent
+         workingDir: /NAS/home/Projects/faster_rcnn_cluster
+         command: ["python" , "./tools/train_faster_rcnn_alt_opt.py" , "--gpu" , "0" , "--net_name" , "ZF" , "--weights" , "data/imagenet_models/ZF.v2.caffemodel" , "--imdb" , "voc_2007_trainval" , "--cfg" , "experiments/cfgs/faster_rcnn_alt_opt.yml" ]
+         env:
+         - name: HOME
+           value: "/NAS/home"
+         - name: PYTHONUNBUFFERED
+           value: "0"
+         resources:
+           requests:
+             cpu: 3.9
+             memory: 8Gi
+           limits:
+             cpu: 12
+             memory: 32Gi
+             nvidia.com/gpu: 1
+         livenessProbe:
+           exec:
+             command:
+             - 'false'
+           initialDelaySeconds: 390000
+           periodSeconds: 1
+         volumeMounts:
+         - name: user-home
+           mountPath: /NAS/home
+         - name: shared-datasets
+           mountPath: /NAS/data
+         - name: user-arx
+           mountPath: /NAS/archive
+         # $SHM_MOUNT
+         - mountPath: /dev/shm
+           name: dshm
+       dnsPolicy: "None"
+       dnsConfig:
+         nameservers:
+           - 8.8.8.8
+           - 8.8.4.4
+         searches:
+           - cis.upenn.edu
+           - seas.upenn.edu
+         options:
+           - name: ndots
+             value: "5"
+           - name: edns0
